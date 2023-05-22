@@ -1,1 +1,2 @@
-from core.models import Base
+from .base import Base
+from .questions import Question
