@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str
     POSTGRES_DATABASE: str
 
+    QUESTIONS_API_URL: str = "https://jservice.io/api/"
+
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         return PostgresDsn.build(
