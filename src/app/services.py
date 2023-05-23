@@ -1,7 +1,7 @@
-from typing import Optional, List
+from typing import List
 
 import httpx
-from sqlalchemy import select, Sequence
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import get_settings
@@ -29,27 +29,44 @@ async def get_questions_from_api(question_num: int) -> List[QuestionSchema]:
             raise QuestionsAPIError
 
 
-async def get_duplicate_questions(session: AsyncSession, questions: List[QuestionSchema]) -> Sequence:
+async def get_duplicate_questions(session: AsyncSession, questions: List[QuestionSchema]) -> List[QuestionSchema]:
     statement = select(Question).where(Question.at_api_id.in_([question.at_api_id for question in questions]))
     result = await session.execute(statement)
-    return result.scalars().all()
+    duplicate_questions = result.scalars().all()
+    return [QuestionSchema(**question.as_dict()) for question in duplicate_questions]
 
 
-async def get_unique_questions(duplicate_questions: Sequence, questions_from_api: List[QuestionSchema]) -> list:
-    duplicate_questions = [QuestionSchema(**question.as_dict()) for question in duplicate_questions]
+async def get_unique_questions(
+        duplicate_questions: List[QuestionSchema],
+        questions_from_api: List[QuestionSchema]
+) -> List[QuestionSchema]:
     unique_questions_from_api = [
         question for question in questions_from_api if question not in duplicate_questions
     ]
     return unique_questions_from_api
 
 
-async def get_last_question(session: AsyncSession) -> Optional:
+async def get_last_question_or_dict(session: AsyncSession) -> QuestionOutSchema | dict:
     statement = select(Question).order_by(Question.id.desc())
     result = await session.execute(statement)
-    return result.scalar()
+    question = result.scalar()
+    if question:
+        return QuestionOutSchema(
+            id=question.at_api_id,
+            question=question.text,
+            answer=question.answer,
+            created_at=question.created_at
+        )
+    else:
+        return {}
 
 
-async def add_questions(session: AsyncSession, question_num: int) -> dict | QuestionOutSchema:
+async def add_questions(session: AsyncSession, questions: List[QuestionSchema]) -> None:
+    session.add_all([Question(**question.dict()) for question in questions])
+    await session.commit()
+
+
+async def questions(session: AsyncSession, question_num: int) -> QuestionOutSchema | dict:
     unique_questions = []
     while question_num != 0:
         questions_from_api = await get_questions_from_api(question_num)
@@ -58,18 +75,9 @@ async def add_questions(session: AsyncSession, question_num: int) -> dict | Ques
             unique_questions.extend(questions_from_api)
             question_num = 0
         else:
-            unique_questions_from_api = await get_unique_questions(duplicate_questions, questions_from_api)
-            unique_questions.extend(unique_questions_from_api)
-            question_num = question_num - len(unique_questions_from_api)
-    last_question_in_db = await get_last_question(session)
-    session.add_all([Question(**unique_question.dict()) for unique_question in unique_questions])
-    await session.commit()
-    if last_question_in_db:
-        return QuestionOutSchema(
-            id=last_question_in_db.at_api_id,
-            question=last_question_in_db.text,
-            answer=last_question_in_db.answer,
-            created_at=last_question_in_db.created_at
-        )
-    else:
-        return {}
+            unique_question_from_api = await get_unique_questions(duplicate_questions, questions_from_api)
+            unique_questions.extend(questions_from_api)
+            question_num = question_num - len(unique_question_from_api)
+    last_question = await get_last_question_or_dict(session)
+    await add_questions(session, unique_questions)
+    return last_question
