@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     QUESTIONS_API_URL: str = "https://jservice.io/api/"
 
+    REQUEST_TIMEOUT: float = 5.0
+
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         return PostgresDsn.build(

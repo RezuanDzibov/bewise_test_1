@@ -13,7 +13,10 @@ settings = get_settings()
 
 async def get_question_from_api(question_num: int) -> list:
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{settings.QUESTIONS_API_URL}random?count={question_num}")
+        response = await client.get(
+            f"{settings.QUESTIONS_API_URL}random?count={question_num}",
+            timeout=settings.REQUEST_TIMEOUT
+        )
         return response.json()
 
 
