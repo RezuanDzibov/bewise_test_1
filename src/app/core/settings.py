@@ -8,7 +8,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings(BaseSettings):
     PROJECT_NAME: str
-    SERVER_HOST: str
 
     DATABASE_ENGINE: str
     POSTGRES_USER: str
