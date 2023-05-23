@@ -15,7 +15,7 @@ class Base:
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
 
-    async def as_dict(self) -> dict:
+    def as_dict(self) -> dict:
         try:
             object_ = inspect(self).dict
             for key, value in object_.items():
