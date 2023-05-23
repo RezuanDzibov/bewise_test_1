@@ -14,6 +14,8 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
     expose:
       - ${POSTGRES_PORT}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
   api:
     container_name: api
     depends_on:
