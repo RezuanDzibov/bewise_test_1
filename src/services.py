@@ -43,7 +43,7 @@ async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
     return None
 
 
-async def add_questions(session: AsyncSession, questions: list[QuestionSchema]) -> int:
+async def insert_questions(session: AsyncSession, questions: list[QuestionSchema]) -> int:
     statement = insert(Question).values([question.dict() for question in questions]).on_conflict_do_nothing()
     statement = statement.returning(Question)
     result = await session.execute(statement)
@@ -51,12 +51,12 @@ async def add_questions(session: AsyncSession, questions: list[QuestionSchema]) 
     return len(result.scalars().all())
 
 
-async def questions(
+async def add_questions(
         session: AsyncSession,
         http_client: httpx.AsyncClient,
         question_num: int
 ) -> None:
     while question_num > 0:
         questions_from_api = await get_questions_from_api(http_client, question_num)
-        added_question_num = await add_questions(session, questions_from_api)
+        added_question_num = await insert_questions(session, questions_from_api)
         question_num -= added_question_num
