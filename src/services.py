@@ -13,7 +13,7 @@ from exceptions import QuestionsAPIError
 settings = get_settings()
 
 
-async def get_questions_from_api(client: httpx.AsyncClient, question_num: int) -> List[QuestionSchema]:
+async def _get_questions_from_api(client: httpx.AsyncClient, question_num: int) -> List[QuestionSchema]:
     try:
         response = await client.get(
             f"{settings.QUESTIONS_API_URL}random?count={question_num}",
@@ -43,20 +43,20 @@ async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
     return None
 
 
-async def insert_questions(session: AsyncSession, questions: list[QuestionSchema]) -> int:
+async def _insert_questions(session: AsyncSession, questions: list[QuestionSchema]) -> int:
     statement = insert(Question).values([question.dict() for question in questions]).on_conflict_do_nothing()
     statement = statement.returning(Question)
     result = await session.execute(statement)
-    await session.commit()
     return len(result.scalars().all())
 
 
-async def add_questions(
+async def insert_questions(
         session: AsyncSession,
         http_client: httpx.AsyncClient,
         question_num: int
 ) -> None:
     while question_num > 0:
-        questions_from_api = await get_questions_from_api(http_client, question_num)
-        added_question_num = await insert_questions(session, questions_from_api)
+        questions_from_api = await _get_questions_from_api(http_client, question_num)
+        added_question_num = await _insert_questions(session, questions_from_api)
         question_num -= added_question_num
+    await session.commit()

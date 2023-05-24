@@ -1,7 +1,7 @@
 FROM python:3.11.3-slim
 
 RUN apt update \
-    && apt install netcat curl -y \
+    && apt install curl -y \
     && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
 
 ENV PYTHONUNBUFFERED=1 \
