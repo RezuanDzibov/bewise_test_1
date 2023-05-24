@@ -29,23 +29,6 @@ async def get_questions_from_api(client: httpx.AsyncClient, question_num: int) -
         raise QuestionsAPIError
 
 
-async def get_duplicate_questions(session: AsyncSession, questions: list[QuestionSchema]) -> list[QuestionSchema]:
-    statement = select(Question).where(Question.at_api_id.in_([question.at_api_id for question in questions]))
-    result = await session.execute(statement)
-    duplicate_questions = result.scalars().all()
-    return [QuestionSchema(**question.as_dict()) for question in duplicate_questions]
-
-
-async def get_unique_questions(
-        duplicate_questions: list[QuestionSchema],
-        questions_from_api: list[QuestionSchema]
-) -> list[QuestionSchema]:
-    unique_questions_from_api = [
-        question for question in questions_from_api if question not in duplicate_questions
-    ]
-    return unique_questions_from_api
-
-
 async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
     statement = select(Question).order_by(Question.id.desc())
     result = await session.execute(statement)
@@ -72,16 +55,8 @@ async def questions(
         session: AsyncSession,
         http_client: httpx.AsyncClient,
         question_num: int
-) -> QuestionOutSchema | dict:
-    last_question = await get_last_question(session)
-    while True:
+) -> None:
+    while question_num > 0:
         questions_from_api = await get_questions_from_api(http_client, question_num)
-        duplicate_questions = await get_duplicate_questions(session, questions_from_api)
-        if not duplicate_questions:
-            await add_questions(session, questions_from_api)
-            break
-        else:
-            unique_question_from_api = await get_unique_questions(duplicate_questions, questions_from_api)
-            added_question_num = await add_questions(session, unique_question_from_api)
-            question_num -= added_question_num
-    return last_question or {}
+        added_question_num = await add_questions(session, questions_from_api)
+        question_num -= added_question_num
