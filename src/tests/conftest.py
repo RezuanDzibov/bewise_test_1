@@ -14,7 +14,7 @@ from core.settings import get_settings
 from main import app
 from models import Base
 from schemas import QuestionSchema
-
+from services import _insert_questions
 
 settings = get_settings()
 fake = Faker()
@@ -69,3 +69,11 @@ async def questions(request: SubRequest) -> list[QuestionSchema]:
         ) for _ in range(questions_num)
     ]
     return questions
+
+
+@pytest.fixture(scope="function")
+@pytest.mark.parametrize("questions", [10], indirect=True)
+async def last_question_in_db(session: AsyncSession, questions: list[QuestionSchema]) -> QuestionSchema:
+    await _insert_questions(session, questions)
+    await session.commit()
+    return questions[-1]
