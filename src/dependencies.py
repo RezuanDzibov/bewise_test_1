@@ -15,6 +15,5 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_http_client() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncClient() as client:
-        client.timeout = settings.QUESTIONS_API_TIMEOUT
+    async with AsyncClient(timeout=settings.QUESTIONS_API_TIMEOUT) as client:
         yield client

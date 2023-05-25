@@ -25,7 +25,11 @@ async def add_questions(
 ) -> QuestionOutSchema | dict:
     question = await get_last_question(session)
     try:
-        await fetch_and_insert_questions(session=session, http_client=http_client, question_num=question_in.question_num)
+        await fetch_and_insert_questions(
+            session=session,
+            http_client=http_client,
+            question_num=question_in.question_num
+        )
     except QuestionsAPIError:
-        raise HTTPException(status_code=503, detail="Service temporarily unreachable, please try again")
+        raise HTTPException(status_code=503, detail="Service temporarily unreachable, please try again later")
     return question or {}
