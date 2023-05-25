@@ -77,3 +77,9 @@ async def last_question_in_db(session: AsyncSession, questions: list[QuestionSch
     await _insert_questions(session, questions)
     await session.commit()
     return questions[-1]
+
+
+@pytest.fixture(scope="function")
+async def http_client() -> AsyncGenerator[AsyncClient, None]:
+    async with AsyncClient(timeout=settings.QUESTIONS_API_TIMEOUT) as client:
+        yield client
