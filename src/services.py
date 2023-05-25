@@ -15,7 +15,9 @@ settings = get_settings()
 
 async def _get_questions_from_api(client: httpx.AsyncClient, question_num: int) -> List[QuestionSchema]:
     try:
-        response = await client.get(f"{settings.QUESTIONS_API_URL}random?count={question_num}",)
+
+
+        response = await client.get(f"{settings.QUESTIONS_API_URL}random?count={question_num}")
         response.raise_for_status()
     except httpx.HTTPError:
         raise QuestionsAPIError
@@ -31,12 +33,7 @@ async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
     result = await session.execute(statement)
     question = result.scalar()
     if question:
-        return QuestionOutSchema(
-            id=question.at_api_id,
-            question=question.text,
-            answer=question.answer,
-            created_at=question.created_at
-        )
+        return QuestionOutSchema.from_orm(question)
     return None
 
 
