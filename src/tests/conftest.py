@@ -1,17 +1,23 @@
 import asyncio
 from asyncio import AbstractEventLoop
+from datetime import datetime
 from typing import Generator, AsyncGenerator
 
 import pytest
+from faker import Faker
 from httpx import AsyncClient
+from pytest_asyncio.plugin import SubRequest
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from core.settings import get_settings
 from main import app
 from models import Base
+from schemas import QuestionSchema
+
 
 settings = get_settings()
+fake = Faker()
 
 
 @pytest.fixture(scope="session")
@@ -49,3 +55,17 @@ async def session(init_tables: None, session_maker: session_maker) -> AsyncGener
 async def http_test_client() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
+
+
+@pytest.fixture(scope="function")
+async def questions(request: SubRequest) -> list[QuestionSchema]:
+    questions_num = request.param if hasattr(request, "param") and isinstance(request.param, int) and request.param > 0 else 1
+    questions = [
+        QuestionSchema(
+            at_api_id=fake.random_int(min=1, max=10000),
+            text=fake.text(),
+            answer=fake.text(max_nb_chars=50),
+            created_at=datetime.utcnow()
+        ) for _ in range(questions_num)
+    ]
+    return questions
