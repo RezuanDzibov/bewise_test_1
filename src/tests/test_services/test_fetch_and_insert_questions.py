@@ -65,9 +65,12 @@ async def test_api_fails_on_second_request(
         [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions]
     )
     httpserver.expect_request("/random", query_string="count=3").respond_with_data("API Failed(", status=503)
+
     with pytest.raises(QuestionsAPIError):
         await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
+
     statement = select(func.count()).select_from(Question)
     result = await session.execute(statement)
+
     questions_in_db_num = result.scalar()
     assert 0 == questions_in_db_num
