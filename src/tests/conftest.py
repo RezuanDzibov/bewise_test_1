@@ -59,7 +59,10 @@ async def http_test_client() -> AsyncGenerator[AsyncSession, None]:
 
 @pytest.fixture(scope="function")
 async def questions(request: SubRequest) -> list[QuestionSchema]:
-    questions_num = request.param if hasattr(request, "param") and isinstance(request.param, int) and request.param > 0 else 1
+    if hasattr(request, "param") and isinstance(request.param, int) and request.param > 0:
+        questions_num = request.param
+    else:
+        questions_num = 1
     questions = [
         QuestionSchema(
             at_api_id=fake.random_int(min=1, max=10000),
