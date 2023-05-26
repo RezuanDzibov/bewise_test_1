@@ -52,12 +52,6 @@ async def session(init_tables: None, session_maker: session_maker) -> AsyncGener
 
 
 @pytest.fixture(scope="function")
-async def http_test_client() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncClient(app=app, base_url="http://testserver") as client:
-        yield client
-
-
-@pytest.fixture(scope="function")
 async def questions(request: SubRequest) -> list[QuestionSchema]:
     if hasattr(request, "param") and isinstance(request.param, int) and request.param > 0:
         questions_num = request.param
