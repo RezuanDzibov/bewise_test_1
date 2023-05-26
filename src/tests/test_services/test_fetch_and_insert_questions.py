@@ -40,9 +40,12 @@ async def test_insert_questions_with_duplicates(
     httpserver.expect_request("/random", query_string="count=3").respond_with_json(
         [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[10:]]
     )
+
     await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
+
     statement = select(func.count()).select_from(Question)
     result = await session.execute(statement)
+
     questions_in_db_num = result.scalar()
     assert 13 == questions_in_db_num
 
