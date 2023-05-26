@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSessio
 from sqlalchemy.orm import sessionmaker
 
 from core.settings import get_settings
-from main import app
 from models import Base
 from schemas import QuestionSchema
 from services import _insert_questions
@@ -78,5 +77,5 @@ async def last_question_in_db(session: AsyncSession, questions: list[QuestionSch
 
 @pytest.fixture(scope="function")
 async def http_client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(timeout=settings.QUESTIONS_API_TIMEOUT) as client:
+    async with AsyncClient(timeout=5.0) as client:
         yield client
