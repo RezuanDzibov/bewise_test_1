@@ -48,7 +48,11 @@ async def fetch_and_insert_questions(
         question_num: int
 ) -> None:
     while question_num > 0:
-        questions_from_api = await _get_questions_from_api(http_client, question_num)
+        try:
+            questions_from_api = await _get_questions_from_api(http_client, question_num)
+        except QuestionsAPIError:
+            await session.rollback()
+            raise
         added_question_num = await _insert_questions(session, questions_from_api)
         question_num -= added_question_num
     await session.commit()
