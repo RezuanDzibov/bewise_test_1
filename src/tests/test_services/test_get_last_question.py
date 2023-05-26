@@ -10,4 +10,4 @@ async def test_questions_exist(session: AsyncSession, last_question_in_db: Quest
 
 
 async def test_questions_not_exist(session: AsyncSession):
-    assert not await get_last_question(session)
+    assert await get_last_question(session) is None
