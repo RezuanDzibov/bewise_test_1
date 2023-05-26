@@ -35,10 +35,10 @@ async def test_insert_questions_with_duplicates(
     await _insert_questions(session=session, questions=questions[:3])
     mocker.patch("services.settings", Settings(QUESTIONS_API_URL=httpserver.url_for("/")))
     httpserver.expect_request("/random", query_string="count=10").respond_with_json(
-        [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[:10]]
+        [json.loads(QuestionOutSchema(**question.dict()).json()) for question in questions[:10]]
     )
     httpserver.expect_request("/random", query_string="count=3").respond_with_json(
-        [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[10:]]
+        [json.loads(QuestionOutSchema(**question.dict()).json()) for question in questions[10:]]
     )
 
     await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
