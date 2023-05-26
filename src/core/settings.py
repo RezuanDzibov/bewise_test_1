@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: str
     POSTGRES_DATABASE: str
+    POSTGRES_SERVICE_HOST: str | None
+
+    RUN_IN_DOCKER: bool | None
 
     QUESTIONS_API_URL: str = "https://jservice.io/api/"
 
