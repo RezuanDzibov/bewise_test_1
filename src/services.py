@@ -15,8 +15,6 @@ settings = get_settings()
 
 async def _get_questions_from_api(client: httpx.AsyncClient, question_num: int) -> List[QuestionSchema]:
     try:
-
-
         response = await client.get(f"{settings.QUESTIONS_API_URL}random?count={question_num}")
         response.raise_for_status()
     except httpx.HTTPError:
