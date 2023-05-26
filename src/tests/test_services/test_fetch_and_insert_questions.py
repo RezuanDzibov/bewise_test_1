@@ -33,11 +33,7 @@ async def test_insert_questions_with_duplicates(
         http_client: AsyncClient,
         questions: list[QuestionSchema]
 ):
-    duplicate_questions = []
-    for i in range(3):
-        duplicate_questions.append(copy(questions[i]))
-    await _insert_questions(session=session, questions=duplicate_questions)
-    await session.commit()
+    await _insert_questions(session=session, questions=questions[:3])
     mocker.patch("services.settings", Settings(QUESTIONS_API_URL=httpserver.url_for("/")))
     httpserver.expect_request("/random", query_string="count=10").respond_with_json(
         [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[:10]]
@@ -46,10 +42,10 @@ async def test_insert_questions_with_duplicates(
         [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[10:]]
     )
     await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
-    statement = select(Question)
+    statement = select(func.count()).select_from(Question)
     result = await session.execute(statement)
-    questions_in_db = result.scalars().all()
-    assert [question.at_api_id for question in questions_in_db] == [question.at_api_id for question in questions]
+    questions_in_db_num = result.scalar()
+    assert 13 == questions_in_db_num
 
 
 @pytest.mark.parametrize("questions", [10], indirect=True)

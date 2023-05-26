@@ -22,6 +22,9 @@ services:
       timeout: 5s
       retries: 5
   api:
+    environment:
+      RUN_IN_DOCKER: True
+      POSTGRES_SERVICE_HOST: db
     container_name: api
     depends_on:
       db:
