@@ -1,5 +1,4 @@
 import json
-import random
 from copy import copy
 
 import pytest
@@ -26,19 +25,25 @@ async def test_insert_questions_without_duplicates(session: AsyncSession, http_c
     assert questions_in_db_num == 10
 
 
-@pytest.mark.parametrize("questions", [10], indirect=True)
-async def test_with_duplicates(
+@pytest.mark.parametrize("questions", [13], indirect=True)
+async def test_insert_questions_with_duplicates(
+        httpserver: HTTPServer,
         mocker: MockerFixture,
         session: AsyncSession,
         http_client: AsyncClient,
         questions: list[QuestionSchema]
 ):
-    questions_with_duplicates = copy(questions)
-    for _ in range(3):
-        questions_with_duplicates.append(copy(random.choice(questions)))
-    mocker.patch(
-        "services._get_questions_from_api",
-        return_value=questions_with_duplicates
+    duplicate_questions = []
+    for i in range(3):
+        duplicate_questions.append(copy(questions[i]))
+    await _insert_questions(session=session, questions=duplicate_questions)
+    await session.commit()
+    mocker.patch("services.settings", Settings(QUESTIONS_API_URL=httpserver.url_for("/")))
+    httpserver.expect_request("/random", query_string="count=10").respond_with_json(
+        [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[:10]]
+    )
+    httpserver.expect_request("/random", query_string="count=3").respond_with_json(
+        [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions[10:]]
     )
     await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
     statement = select(Question)
