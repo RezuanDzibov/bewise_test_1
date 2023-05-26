@@ -1,5 +1,4 @@
 import json
-from copy import copy
 
 import pytest
 from httpx import AsyncClient
@@ -58,7 +57,6 @@ async def test_api_fails_on_second_request(
 ):
     duplicate_questions = [question for question in questions[:3]]
     await _insert_questions(session=session, questions=duplicate_questions)
-    await session.commit()
     mocker.patch("services.settings", Settings(QUESTIONS_API_URL=httpserver.url_for("/")))
     httpserver.expect_request("/random", query_string="count=10").respond_with_json(
         [json.loads(QuestionOutSchema(**json.loads(question.json())).json()) for question in questions]
@@ -66,3 +64,7 @@ async def test_api_fails_on_second_request(
     httpserver.expect_request("/random", query_string="count=3").respond_with_data("API Failed(", status=503)
     with pytest.raises(QuestionsAPIError):
         await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
+    statement = select(func.count()).select_from(Question)
+    result = await session.execute(statement)
+    questions_in_db_num = result.scalar()
+    assert 0 == questions_in_db_num
