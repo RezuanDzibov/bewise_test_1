@@ -19,7 +19,9 @@ from services import fetch_and_insert_questions, _insert_questions
 async def test_insert_questions_without_duplicates(session: AsyncSession, http_client: AsyncClient):
     await fetch_and_insert_questions(session=session, http_client=http_client, question_num=10)
     statement = select(func.count()).select_from(Question)
+
     result = await session.execute(statement)
+
     questions_in_db_num = result.scalar()
     assert questions_in_db_num == 10
 
