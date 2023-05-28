@@ -1,0 +1,43 @@
+env:
+  POSTGRES_USER: bewise
+  POSTGRES_PASSWORD: bewisepassword
+  POSTGRES_DATABASE: bewise
+  POSTGRES_DB: bewise
+  POSTGRES_PORT: 5432
+  DATABASE_ENGINE: postgresql+asyncpg
+  PROJECT_NAME: Bewise Questions API
+  SERVER_HOST: 127.0.0.1
+  RUN_IN_DOCKER: True
+  POSTGRES_SERVICE_HOST: db
+permissions:
+  contents: read
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:14
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER}}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - ${POSTGRES_PROT}:${POSTGRES_PORT}
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.11.1
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11.1"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Test with pytest
+      working-directory: ./src/tests
+      run: |
+        pytest
