@@ -1,2 +1,2 @@
 class QuestionsAPIError(Exception):
-    """ Raise when jservice api responses with erroneous http code """
+    """Raise when jservice api responses with erroneous http code"""
