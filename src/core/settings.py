@@ -14,12 +14,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_PORT: str
     POSTGRES_DATABASE: str
-    POSTGRES_SERVICE_HOST: str | None
-
-    RUN_IN_DOCKER: bool | None
+    POSTGRES_HOST: str
 
     QUESTIONS_API_URL: str = "https://jservice.io/api/"
-
     QUESTIONS_API_TIMEOUT: float = 5.0
 
     @property
@@ -31,12 +28,6 @@ class Settings(BaseSettings):
             host=self.POSTGRES_HOST,
             path=f"/{self.POSTGRES_DATABASE}",
         )
-
-    @property
-    def POSTGRES_HOST(self) -> str:
-        if self.RUN_IN_DOCKER:
-            return self.POSTGRES_SERVICE_HOST
-        return "localhost"
 
     class Config:
         env_file = Path(f"{BASE_DIR}/.env")
