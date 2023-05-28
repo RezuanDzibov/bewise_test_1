@@ -7,11 +7,11 @@ from pytest_mock import MockerFixture
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.settings import Settings
-from exceptions import QuestionsAPIError
-from models import Question
-from schemas import QuestionSchema, QuestionOutSchema
-from services import fetch_and_insert_questions, _insert_questions
+from src.core.settings import Settings
+from src.exceptions import QuestionsAPIError
+from src.models import Question
+from src.schemas import QuestionSchema, QuestionOutSchema
+from src.services import fetch_and_insert_questions, _insert_questions
 
 
 async def test_insert_questions_without_duplicates(

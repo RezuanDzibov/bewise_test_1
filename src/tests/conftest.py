@@ -10,10 +10,10 @@ from pytest_asyncio.plugin import SubRequest
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from core.settings import get_settings
-from models import Base
-from schemas import QuestionSchema
-from services import _insert_questions
+from src.core.settings import get_settings
+from src.models import Base
+from src.schemas import QuestionSchema
+from src.services import _insert_questions
 
 settings = get_settings()
 fake = Faker()
