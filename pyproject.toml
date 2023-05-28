@@ -34,3 +34,4 @@ exclude = ["src/models/__init__.py"]
 
 [tool.pytest.ini_options]
 pythonpath=["src"]
+asyncio_mode= "auto"
