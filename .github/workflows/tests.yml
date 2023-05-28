@@ -1,3 +1,7 @@
+name: Run tests
+
+on: [push, pull_request]
+
 env:
   POSTGRES_USER: bewise
   POSTGRES_PASSWORD: bewisepassword
