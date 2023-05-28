@@ -11,9 +11,6 @@ env:
   POSTGRES_HOST: localhost
   DATABASE_ENGINE: postgresql+asyncpg
   PROJECT_NAME: Bewise Questions API
-  SERVER_HOST: 127.0.0.1
-  RUN_IN_DOCKER: True
-  POSTGRES_SERVICE_HOST: db
 permissions:
   contents: read
 
