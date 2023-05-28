@@ -41,18 +41,30 @@ async def init_tables(engine: AsyncEngine) -> None:
 
 @pytest.fixture(scope="function")
 async def session_maker(engine: AsyncEngine) -> sessionmaker:
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False, class_=AsyncSession)
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+        expire_on_commit=False,
+        class_=AsyncSession,
+    )
 
 
 @pytest.fixture(scope="function")
-async def session(init_tables: None, session_maker: session_maker) -> AsyncGenerator[AsyncSession, None]:
+async def session(
+    init_tables: None, session_maker: session_maker
+) -> AsyncGenerator[AsyncSession, None]:
     async with session_maker() as session:
         yield session
 
 
 @pytest.fixture(scope="function")
 async def questions(request: SubRequest) -> list[QuestionSchema]:
-    if hasattr(request, "param") and isinstance(request.param, int) and request.param > 0:
+    if (
+        hasattr(request, "param")
+        and isinstance(request.param, int)
+        and request.param > 0
+    ):
         questions_num = request.param
     else:
         questions_num = 1
@@ -61,15 +73,18 @@ async def questions(request: SubRequest) -> list[QuestionSchema]:
             at_api_id=fake.random_int(min=1, max=10000),
             text=fake.text(),
             answer=fake.text(max_nb_chars=50),
-            created_at=datetime.utcnow()
-        ) for _ in range(questions_num)
+            created_at=datetime.utcnow(),
+        )
+        for _ in range(questions_num)
     ]
     return questions
 
 
 @pytest.fixture(scope="function")
 @pytest.mark.parametrize("questions", [10], indirect=True)
-async def last_question_in_db(session: AsyncSession, questions: list[QuestionSchema]) -> QuestionSchema:
+async def last_question_in_db(
+    session: AsyncSession, questions: list[QuestionSchema]
+) -> QuestionSchema:
     await _insert_questions(session, questions)
     await session.commit()
     return questions[-1]

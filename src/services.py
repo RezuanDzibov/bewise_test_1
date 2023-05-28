@@ -13,16 +13,19 @@ from schemas import QuestionSchema, QuestionOutSchema
 settings = get_settings()
 
 
-async def _get_questions_from_api(client: httpx.AsyncClient, question_num: int) -> List[QuestionSchema]:
+async def _get_questions_from_api(
+    client: httpx.AsyncClient, question_num: int
+) -> List[QuestionSchema]:
     try:
-        response = await client.get(f"{settings.QUESTIONS_API_URL}random?count={question_num}")
+        response = await client.get(
+            f"{settings.QUESTIONS_API_URL}random?count={question_num}"
+        )
         response.raise_for_status()
     except httpx.HTTPError:
         raise QuestionsAPIError
     return [
-        QuestionSchema(
-            at_api_id=question["id"], text=question["question"], **question
-        ) for question in response.json()
+        QuestionSchema(at_api_id=question["id"], text=question["question"], **question)
+        for question in response.json()
     ]
 
 
@@ -35,21 +38,27 @@ async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
     return None
 
 
-async def _insert_questions(session: AsyncSession, questions: list[QuestionSchema]) -> int:
-    statement = insert(Question).values([question.dict() for question in questions]).on_conflict_do_nothing()
+async def _insert_questions(
+    session: AsyncSession, questions: list[QuestionSchema]
+) -> int:
+    statement = (
+        insert(Question)
+        .values([question.dict() for question in questions])
+        .on_conflict_do_nothing()
+    )
     statement = statement.returning(Question)
     result = await session.execute(statement)
     return len(result.scalars().all())
 
 
 async def fetch_and_insert_questions(
-        session: AsyncSession,
-        http_client: httpx.AsyncClient,
-        question_num: int
+    session: AsyncSession, http_client: httpx.AsyncClient, question_num: int
 ) -> None:
     while question_num > 0:
         try:
-            questions_from_api = await _get_questions_from_api(http_client, question_num)
+            questions_from_api = await _get_questions_from_api(
+                http_client, question_num
+            )
         except QuestionsAPIError:
             await session.rollback()
             raise
