@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas import QuestionSchema
-from src.services import get_last_question
+from schemas import QuestionSchema
+from services import get_last_question
 
 
 async def test_questions_exist(
