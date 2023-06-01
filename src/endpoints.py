@@ -12,7 +12,7 @@ from services import fetch_and_insert_questions, get_last_question
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
 async def redirect_to_docs():
     return RedirectResponse("/docs")
 
