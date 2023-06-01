@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: postgres
+    container_name: postgres_bewise_1
     env_file:
       - .env
     restart: always
@@ -22,8 +22,7 @@ services:
       timeout: 5s
       retries: 5
   api:
-    environment:
-    container_name: api
+    container_name: api_bewise_1
     depends_on:
       db:
         condition: service_healthy
