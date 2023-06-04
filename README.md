@@ -17,6 +17,7 @@
       <ul>
         <li><a href="#prerequisites">Предварительные условия</a></li>
         <li><a href="#how-to-launch">Как запустить</a></li>
+        <li><a href="#db-access">Как подключиться к СУБД</a></li> 
       </ul>
     </li>
     <li><a href="#usage">Использование</a></li>
@@ -92,6 +93,21 @@
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<a name="db-access"></a>
+### Подключение к СУБД
+После запуска проекта вам нужно находиться в корневой директори проекта
+
+1. Получаем доступ к башу контейнера СУБД
+   ```sh
+   docker exec -it postgres bash
+   ```
+
+2. Подключаемся к СУБД, вместо POSTGRES_USER надо подставить нужное значение из .env файла, по дефолту это bewise
+   ```sh
+   psql -U bewise
+   ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- USAGE EXAMPLES -->
