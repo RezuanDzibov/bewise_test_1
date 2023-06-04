@@ -1,4 +1,3 @@
-import uvicorn
 from fastapi import FastAPI
 
 from core.settings import get_settings
@@ -8,7 +7,3 @@ settings = get_settings()
 
 app = FastAPI(title=settings.PROJECT_NAME)
 app.include_router(questions_router, tags=["questions"])
-
-
-if __name__ == "__main__":
-    uvicorn.run(app)
