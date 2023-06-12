@@ -38,7 +38,7 @@ async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
             id=question.at_api_id,
             question=question.text,
             answer=question.answer,
-            created_at=question.created_at
+            created_at=question.created_at,
         )
     return None
 
