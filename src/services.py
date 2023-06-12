@@ -34,7 +34,12 @@ async def get_last_question(session: AsyncSession) -> QuestionOutSchema | None:
     result = await session.execute(statement)
     question = result.scalar()
     if question:
-        return QuestionOutSchema.from_orm(question)
+        return QuestionOutSchema(
+            id=question.at_api_id,
+            question=question.text,
+            answer=question.answer,
+            created_at=question.created_at
+        )
     return None
 
 
