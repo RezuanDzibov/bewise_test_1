@@ -42,13 +42,21 @@ async def test_insert_questions_with_duplicates(
     )
     httpserver.expect_request("/random", query_string="count=10").respond_with_json(
         [
-            json.loads(QuestionOutSchema(**question.dict()).json())
+            json.loads(
+                QuestionOutSchema(
+                    id=question.at_api_id, question=question.text, **question.dict()
+                ).json()
+            )
             for question in questions[:10]
         ]
     )
     httpserver.expect_request("/random", query_string="count=3").respond_with_json(
         [
-            json.loads(QuestionOutSchema(**question.dict()).json())
+            json.loads(
+                QuestionOutSchema(
+                    id=question.at_api_id, question=question.text, **question.dict()
+                ).json()
+            )
             for question in questions[10:]
         ]
     )
@@ -79,7 +87,11 @@ async def test_api_fails_on_second_request(
     )
     httpserver.expect_request("/random", query_string="count=10").respond_with_json(
         [
-            json.loads(QuestionOutSchema(**question.dict()).json())
+            json.loads(
+                QuestionOutSchema(
+                    id=question.at_api_id, question=question.text, **question.dict()
+                ).json()
+            )
             for question in questions
         ]
     )
