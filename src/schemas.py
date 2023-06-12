@@ -21,5 +21,4 @@ class QuestionOutSchema(BaseModel):
     created_at: datetime.datetime
 
     class Config:
-        fields = {"id": "at_api_id", "question": "text"}
         orm_mode = True
